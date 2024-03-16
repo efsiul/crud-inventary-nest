@@ -1,0 +1,14 @@
+services:
+  mongo:
+    image: mongo
+    ports:
+      - '27017:27017'
+    command: --config /etc/mongo/mongod.conf
+    env_file:
+      - .env
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo:/etc/mongo
+
+volumes:
+  mongo_data:
