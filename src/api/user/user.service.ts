@@ -1,5 +1,5 @@
 import { EntityDTO, EntityManager, wrap } from '@mikro-orm/core';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '@/infrastructure/repository/user.repository';
 import { User } from '@/domain/user';
 
@@ -19,4 +19,32 @@ export class UserService {
     await this.entityManager.persistAndFlush(createdUser);
     return wrap(createdUser).toObject();
   }
+  public async editUser(id: string, name: string): Promise<EntityDTO<User>> {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) {
+      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+    }
+    user.name = name;
+    await this.entityManager.flush();
+    return wrap(user).toObject();
+  }
+
+  public async getUserById(id: string): Promise<EntityDTO<User>> {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) {
+      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+    }
+    return wrap(user).toObject();
+  }
+
+  public async getAllUsers(): Promise<EntityDTO<User>[]> {
+    const users = await this.userRepository.findAll();
+    return users.map(user => wrap(user).toObject());
+  }
+
+  async deleteUser(id: string): Promise<number> {
+    return this.userRepository.nativeDelete({ id });
+  }
+
+
 }
